@@ -40,6 +40,7 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Validate and trim semver
         id: semver
@@ -70,19 +71,19 @@ jobs:
       - name: Setup CI Bot
         if: github.event_name == 'workflow_dispatch'
         run: |
-          git config user.name "${{ secrets.BOT_USERNAME }}"
-          git config user.email "${{ secrets.BOT_USEREMAIL }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Update package.json and commit
         if: github.event_name == 'workflow_dispatch'
         run: |
           jq --arg version "${{ steps.semver.outputs.version }}" '.version = $version' package.json > package.json.tmp && mv package.json.tmp package.json
           git add package.json
-          git commit -S -m "chore: release v${{ steps.semver.outputs.version }}" --no-verify
+          git commit -m "chore: release v${{ steps.semver.outputs.version }}" --no-verify
           git push
 
           # For local build, needn't push, the tag will be created by `gh release create`
-          git tag -s "v${{ steps.semver.outputs.version }}" -m "Release v${{ steps.semver.outputs.version }}"
+          git tag "v${{ steps.semver.outputs.version }}" -m "Release v${{ steps.semver.outputs.version }}"
 
       - name: Get current tag
         id: get_current_tag
@@ -106,7 +107,7 @@ jobs:
           # Add back the current tag if is a pre-release
           # Should not add `-f`, as it will overwrite the existing tag
           if [[ "${{ steps.check_pre_release.outputs.is_pre_release }}" == "true" ]]; then
-            git tag -s "$CURRENT_TAG" -m "Release $CURRENT_TAG"
+            git tag "$CURRENT_TAG" -m "Release $CURRENT_TAG"
           fi
 
       - name: Generate changelog
@@ -153,30 +154,6 @@ jobs:
             dist/openlist-frontend-dist-v*.tar.gz lite-dist/openlist-frontend-dist-lite-v*.tar.gz dist/i18n.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Prepare for npm
-        run: |
-          # Delete the generated dist tarball
-          rm -f dist/openlist-frontend-dist-v*.tar.gz
-          rm -f lite-dist/openlist-frontend-dist-lite-v*.tar.gz
-          # Copy the lite version
-          mkdir dist/lite
-          cp -r lite-dist/. dist/lite/
-
-          if ! jq -e '.name and .version' package.json > /dev/null; then
-            echo "Error: Invalid package.json"
-            exit 1
-          fi
-
-      - name: Publish npm (Trusted publishing)
-        run: |
-          if [ "${{ secrets[format('{0}', 'NPM_PUBLISH')] }}" = "yes" ]; then
-            echo "NPM_PUBLISH=yes, publishing to npm with trusted publishing..."
-            pnpm publish --no-git-checks --access public --provenance
-          else
-            echo "NPM_PUBLISH is not yes, performing dry run"
-            pnpm publish --dry-run --no-git-checks --access public
-          fi
 
 permissions:
   contents: write
