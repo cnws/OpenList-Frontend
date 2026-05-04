@@ -26,7 +26,7 @@
     "names": {
       "download": "Direct Download",
       "html": "HTML Render",
-      "aliyun_video": "Aliyun Video Player",
+      "aliyun_video": "HLS Player",
       "markdown": "Markdown Render",
       "flash": "Flash Player",
       "markdown_with_word_wrap": "Markdown Render (with word wrap)",
