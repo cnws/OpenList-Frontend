@@ -26,7 +26,7 @@
     "names": {
       "download": "直接下载",
       "html": "HTML 渲染器",
-      "aliyun_video": "阿里云视频播放器",
+      "aliyun_video": "转码播放器",
       "markdown": "Markdown 渲染器",
       "flash": "Flash 播放器",
       "markdown_with_word_wrap": "Markdown 渲染器（带换行）",
@@ -43,7 +43,7 @@
       "xls": "XLS 预览器",
       "doc": "DOC 预览器",
       "asciinema": "Asciinema 播放器",
-      "video360": "全景视频播放器",
+      "video360": "全景播放器",
       "archive": "压缩包预览器"
     }
   },
